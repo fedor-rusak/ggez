@@ -199,6 +199,7 @@ pub struct GlBackendSpec {
 
 impl From<conf::Backend> for GlBackendSpec {
     fn from(c: conf::Backend) -> Self {
+        println!("      Here we can see some glutin dependency!");
         match c {
             conf::Backend::OpenGL { major, minor } => Self {
                 major,
