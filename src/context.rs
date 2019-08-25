@@ -76,6 +76,7 @@ impl Context {
     /// Tries to create a new Context using settings from the given [`Conf`](../conf/struct.Conf.html) object.
     /// Usually called by [`ContextBuilder::build()`](struct.ContextBuilder.html#method.build).
     fn from_conf(conf: conf::Conf, mut fs: Filesystem) -> GameResult<(Context, winit::EventsLoop)> {
+        println!("  Then Context::from_conf takes the place!");
         let debug_id = DebugId::new();
         let audio_context: Box<dyn audio::AudioContext> = if conf.modules.audio {
             Box::new(audio::RodioAudioContext::new()?)
@@ -287,6 +288,7 @@ impl ContextBuilder {
 
     /// Build the `Context`.
     pub fn build(self) -> GameResult<(Context, winit::EventsLoop)> {
+        println!(" Then we call fn build in same file");
         let mut fs = Filesystem::new(self.game_id.as_ref(), self.author.as_ref())?;
 
         for path in &self.paths {
