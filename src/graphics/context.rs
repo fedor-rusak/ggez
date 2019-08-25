@@ -80,6 +80,7 @@ impl GraphicsContextGeneric<GlBackendSpec> {
         backend: GlBackendSpec,
         debug_id: DebugId,
     ) -> GameResult<Self> {
+        println!("    This is some heavy stuff for graphics setup");
         let srgb = window_setup.srgb;
         let color_format = if srgb {
             gfx::format::Format(
@@ -170,6 +171,7 @@ impl GraphicsContextGeneric<GlBackendSpec> {
         }
 
         // GFX SETUP
+        println!("    Oh Hi Gfx!");
         let mut encoder = GlBackendSpec::encoder(&mut factory);
 
         let blend_modes = [

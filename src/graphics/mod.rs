@@ -260,6 +260,7 @@ impl BackendSpec for GlBackendSpec {
         ),
         glutin::CreationError,
     > {
+        println!("    Actual window setup with events_loop integration. gfx.");
         gfx_window_glutin::init_raw(
             window_builder,
             gl_builder,
