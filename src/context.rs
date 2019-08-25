@@ -202,6 +202,8 @@ pub struct ContextBuilder {
 impl ContextBuilder {
     /// Create a new `ContextBuilder` with default settings.
     pub fn new(game_id: &str, author: &str) -> Self {
+        println!("First we call context.rs file fn new!");
+
         Self {
             game_id: game_id.to_string(),
             author: author.to_string(),
