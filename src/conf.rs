@@ -378,7 +378,7 @@ impl ModuleConf {
 /// }
 /// # , Conf::default()); }
 /// ```
-#[derive(Serialize, Deserialize, Debug, PartialEq, SmartDefault, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Conf {
     /// Window setting information that can be set at runtime
     pub window_mode: WindowMode,
@@ -390,11 +390,21 @@ pub struct Conf {
     pub modules: ModuleConf,
 }
 
+impl Default for Conf {
+    fn default() -> Self {
+        println!("   Default conf::Conf with OpenGL backend!");
+        Self {
+            window_mode: WindowMode::default(),
+            window_setup: WindowSetup::default(),
+            backend: Backend::default(),
+            modules: ModuleConf::default()
+        }
+    }
+}
+
 impl Conf {
     /// Same as `Conf::default()`
     pub fn new() -> Self {
-        println!("   Many defaults from conf.rs");
-        println!("    With openGL backend by default!");
         Self::default()
     }
 
