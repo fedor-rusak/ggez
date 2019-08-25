@@ -79,10 +79,12 @@ impl Context {
         println!("  Then Context::from_conf takes the place!");
         let debug_id = DebugId::new();
         let audio_context: Box<dyn audio::AudioContext> = if conf.modules.audio {
+            println!("  Here we see Rodio!");
             Box::new(audio::RodioAudioContext::new()?)
         } else {
             Box::new(audio::NullAudioContext::default())
         };
+        println!("  Here we see winit library for events_loop!");
         let events_loop = winit::EventsLoop::new();
         let timer_context = timer::TimeContext::new();
         let backend_spec = graphics::GlBackendSpec::from(conf.backend);

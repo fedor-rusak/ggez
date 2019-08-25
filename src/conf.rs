@@ -393,6 +393,8 @@ pub struct Conf {
 impl Conf {
     /// Same as `Conf::default()`
     pub fn new() -> Self {
+        println!("   Many defaults from conf.rs");
+        println!("    With openGL backend by default!");
         Self::default()
     }
 
