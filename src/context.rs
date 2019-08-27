@@ -76,18 +76,19 @@ impl Context {
     /// Tries to create a new Context using settings from the given [`Conf`](../conf/struct.Conf.html) object.
     /// Usually called by [`ContextBuilder::build()`](struct.ContextBuilder.html#method.build).
     fn from_conf(conf: conf::Conf, mut fs: Filesystem) -> GameResult<(Context, winit::EventsLoop)> {
-        println!("  Then Context::from_conf takes the place!");
+        println!("  context.rs - Then Context::from_conf takes the place!");
         let debug_id = DebugId::new();
         let audio_context: Box<dyn audio::AudioContext> = if conf.modules.audio {
-            println!("  Here we see Rodio!");
+            println!("  context.rs - Here we see Rodio!");
             Box::new(audio::RodioAudioContext::new()?)
         } else {
             Box::new(audio::NullAudioContext::default())
         };
-        println!("  Here we see winit library for events_loop!");
+        println!("  context.rs - Here we see winit library for events_loop!");
         let events_loop = winit::EventsLoop::new();
         let timer_context = timer::TimeContext::new();
         let backend_spec = graphics::GlBackendSpec::from(conf.backend);
+        println!("  context.rs - let the graphics hell break loose!");
         let graphics_context = graphics::context::GraphicsContext::new(
             &mut fs,
             &events_loop,
@@ -97,6 +98,7 @@ impl Context {
             debug_id,
         )?;
         let mouse_context = mouse::MouseContext::new();
+        println!("  context.rs - don't forget the keyboard!");
         let keyboard_context = keyboard::KeyboardContext::new();
         let gamepad_context: Box<dyn gamepad::GamepadContext> = if conf.modules.gamepad {
             Box::new(gamepad::GilrsGamepadContext::new()?)
@@ -205,7 +207,7 @@ pub struct ContextBuilder {
 impl ContextBuilder {
     /// Create a new `ContextBuilder` with default settings.
     pub fn new(game_id: &str, author: &str) -> Self {
-        println!("First we call context.rs file fn new!");
+        println!("  context.rs - First we call context.rs file fn new!");
 
         Self {
             game_id: game_id.to_string(),
@@ -290,7 +292,7 @@ impl ContextBuilder {
 
     /// Build the `Context`.
     pub fn build(self) -> GameResult<(Context, winit::EventsLoop)> {
-        println!(" Then we call fn build in same file");
+        println!("  context.rs - Then we call fn build in same file");
         let mut fs = Filesystem::new(self.game_id.as_ref(), self.author.as_ref())?;
 
         for path in &self.paths {

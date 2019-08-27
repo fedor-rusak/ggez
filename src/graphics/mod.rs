@@ -199,7 +199,7 @@ pub struct GlBackendSpec {
 
 impl From<conf::Backend> for GlBackendSpec {
     fn from(c: conf::Backend) -> Self {
-        println!("      Here we can see some glutin dependency!");
+        println!("    graphics/mod.rs - Here we can see some glutin dependency!");
         match c {
             conf::Backend::OpenGL { major, minor } => Self {
                 major,
@@ -230,6 +230,7 @@ impl BackendSpec for GlBackendSpec {
     }
 
     fn shaders(&self) -> (&'static [u8], &'static [u8]) {
+        println!("    graphics/mod.rs - Also some sweet hard-coded shaders here (for text)!");
         match self.api {
             glutin::Api::OpenGl => (
                 include_bytes!("shader/basic_150.glslv"),
@@ -260,7 +261,7 @@ impl BackendSpec for GlBackendSpec {
         ),
         glutin::CreationError,
     > {
-        println!("    Actual window setup with events_loop integration. gfx.");
+        println!("    graphics/mod.rs - Actual window setup with events_loop integration. gfx.");
         gfx_window_glutin::init_raw(
             window_builder,
             gl_builder,

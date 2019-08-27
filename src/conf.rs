@@ -392,7 +392,7 @@ pub struct Conf {
 
 impl Default for Conf {
     fn default() -> Self {
-        println!("   Default conf::Conf with OpenGL backend!");
+        println!("    graphics/conf.rs - Default conf::Conf with OpenGL backend!");
         Self {
             window_mode: WindowMode::default(),
             window_setup: WindowSetup::default(),

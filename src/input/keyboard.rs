@@ -126,6 +126,7 @@ pub struct KeyboardContext {
 
 impl KeyboardContext {
     pub(crate) fn new() -> Self {
+        println!("    input/keyboard.rs - winit again! And that is a good news.");
         Self {
             active_modifiers: KeyMods::empty(),
             // We just use 256 as a number Big Enough For Keyboard Keys to try to avoid resizing.
