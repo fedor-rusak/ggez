@@ -351,6 +351,7 @@ impl Drawable for Image {
             None
         };
 
+        println!("    graphics/image.rs - hmm draw call from Image");
         gfx.draw(None)?;
         if let Some(mode) = previous_mode {
             gfx.set_blend_mode(mode)?;

@@ -281,6 +281,7 @@ impl GraphicsContextGeneric<GlBackendSpec> {
             w,
             h,
         };
+        println!("    graphics/context.rs - we definitely use orthographic projection...");
         gfx.set_projection_rect(rect);
         gfx.calculate_transform_matrix();
         gfx.update_globals()?;
@@ -391,6 +392,7 @@ where
         let id = (*self.current_shader.borrow()).unwrap_or(self.default_shader);
         let shader_handle = &self.shaders[id];
 
+        println!("    graphics/context.rs - actual draw!");
         shader_handle.draw(&mut self.encoder, slice, &self.data)?;
         Ok(())
     }
@@ -482,6 +484,7 @@ where
 
         // TODO LATER: find out if single-dimension constraints are possible?
         let min_dimensions = if mode.min_width > 0.0 && mode.min_height > 0.0 {
+            println!("    graphics/context.rs - dpi mumbo-jumbo!");
             Some(dpi::LogicalSize {
                 width: f64::from(mode.min_width),
                 height: f64::from(mode.min_height),
@@ -492,6 +495,7 @@ where
         window.set_min_dimensions(min_dimensions);
 
         let max_dimensions = if mode.max_width > 0.0 && mode.max_height > 0.0 {
+            println!("    graphics/context.rs - dpi mumbo-jumbo once more...");
             Some(dpi::LogicalSize {
                 width: f64::from(mode.max_width),
                 height: f64::from(mode.max_height),

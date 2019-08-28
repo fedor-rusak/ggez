@@ -279,6 +279,7 @@ impl BackendSpec for GlBackendSpec {
         gfx::handle::RawRenderTargetView<Self::Resources>,
         gfx::handle::RawDepthStencilView<Self::Resources>,
     )> {
+        println!("    graphics/mod.rs - This gfx resize_viewport definitely magical.");
         // Basically taken from the definition of
         // gfx_window_glutin::update_views()
         let dim = color_view.get_dimensions();
@@ -464,8 +465,8 @@ where
     D: Drawable,
     T: Into<DrawParam>,
 {
-    let params = params.into();
-    drawable.draw(ctx, params)
+    println!("    graphics/mod.rs - it was just some fancy call to draw from Drawable!");
+    drawable.draw(ctx, params.into())
 }
 
 /// Tells the graphics system to actually put everything on the screen.
