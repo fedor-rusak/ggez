@@ -26,8 +26,6 @@ pub struct DrawParam {
     pub src: Rect,
     /// The position to draw the graphic expressed as a `Point2`.
     pub dest: mint::Point2<f32>,
-    /// The orientation of the graphic in radians.
-    pub rotation: f32,
     /// The x/y scale factors expressed as a `Vector2`.
     pub scale: mint::Vector2<f32>
 }
@@ -37,7 +35,6 @@ impl Default for DrawParam {
         DrawParam {
             src: Rect::one(),
             dest: mint::Point2 { x: 0.0, y: 0.0 },
-            rotation: 0.0,
             scale: mint::Vector2 { x: 1.0, y: 1.0 },
         }
     }
@@ -65,12 +62,6 @@ impl DrawParam {
         self
     }
 
-    /// Set the rotation of the drawable.
-    pub fn rotation(mut self, rotation: f32) -> Self {
-        self.rotation = rotation;
-        self
-    }
-
     /// Set the scaling factors of the drawable.
     pub fn scale<V>(mut self, scale: V) -> Self
     where
@@ -88,7 +79,7 @@ impl DrawParam {
         let offset = Matrix4::new_translation(&Vec3::new(offset_value.x, offset_value.y, 0.0));
         let offset_inverse =
             Matrix4::new_translation(&Vec3::new(-offset_value.x, -offset_value.y, 0.0));
-        let axis_angle = Vec3::z() * self.rotation;
+        let axis_angle = Vec3::z() * 0.0; //default rotation
         let rotation = Matrix4::new_rotation(axis_angle);
         let scale = Matrix4::new_nonuniform_scaling(&Vec3::new(self.scale.x, self.scale.y, 1.0));
         translate * offset * rotation * scale * offset_inverse
@@ -115,28 +106,15 @@ where
     }
 }
 
-/// Create a `DrawParam` from a location, rotation
-impl<P> From<(P, f32)> for DrawParam
-where
-    P: Into<mint::Point2<f32>>,
-{
-    fn from((location, rotation): (P, f32)) -> Self {
-        DrawParam::new()
-            .dest(location)
-            .rotation(rotation)
-    }
-}
-
-/// Create a `DrawParam` from a location, rotation, scale
-impl<P, V> From<(P, f32, V)> for DrawParam
+/// Create a `DrawParam` from a location, scale
+impl<P, V> From<(P, V)> for DrawParam
 where
     P: Into<mint::Point2<f32>>,
     V: Into<mint::Vector2<f32>>,
 {
-    fn from((location, rotation, scale): (P, f32, V)) -> Self {
+    fn from((location, scale): (P, V)) -> Self {
         DrawParam::new()
             .dest(location)
-            .rotation(rotation)
             .scale(scale)
     }
 }
