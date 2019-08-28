@@ -318,8 +318,8 @@ impl Drawable for Image {
         self.debug_id.assert(ctx);
 
         let gfx = &mut ctx.gfx_context;
-        let src_width = param.src.w;
-        let src_height = param.src.h;
+        let src_width = 1.0;
+        let src_height = 1.0;
         // We have to mess with the scale to make everything
         // be its-unit-size-in-pixels.
         let real_scale = nalgebra::Vector2::new(

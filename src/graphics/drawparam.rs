@@ -21,9 +21,6 @@ type Vec3 = na::Vector3<f32>;
 /// As a shortcut, it also implements `From` for a variety of tuple types.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct DrawParam {
-    /// A portion of the drawable to clip, as a fraction of the whole image.
-    /// Defaults to the whole image `(0,0 to 1,1)` if omitted.
-    pub src: Rect,
     /// The position to draw the graphic expressed as a `Point2`.
     pub dest: mint::Point2<f32>,
     /// The x/y scale factors expressed as a `Vector2`.
@@ -33,7 +30,6 @@ pub struct DrawParam {
 impl Default for DrawParam {
     fn default() -> Self {
         DrawParam {
-            src: Rect::one(),
             dest: mint::Point2 { x: 0.0, y: 0.0 },
             scale: mint::Vector2 { x: 1.0, y: 1.0 },
         }
@@ -44,12 +40,6 @@ impl DrawParam {
     /// Create a new DrawParam with default values.
     pub fn new() -> Self {
         Self::default()
-    }
-
-    /// Set the source rect
-    pub fn src(mut self, src: Rect) -> Self {
-        self.src = src;
-        self
     }
 
     /// Set the dest point
@@ -152,7 +142,7 @@ impl From<DrawParam> for DrawTransform {
     fn from(param: DrawParam) -> Self {
         let transform = param.to_matrix();
         DrawTransform {
-            src: param.src,
+            src: Rect::one(),
             color: WHITE,
             matrix: transform.into(),
         }
