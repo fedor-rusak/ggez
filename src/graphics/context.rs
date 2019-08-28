@@ -7,7 +7,7 @@ use glutin;
 use glyph_brush::{GlyphBrush, GlyphBrushBuilder};
 use winit::{self, dpi};
 
-use crate::conf::{FullscreenType, WindowMode, WindowSetup};
+use crate::conf::{WindowMode, WindowSetup};
 use crate::context::DebugId;
 use crate::filesystem::Filesystem;
 use crate::graphics::*;
@@ -535,35 +535,14 @@ where
             None
         };
         window.set_max_dimensions(max_dimensions);
+        window.set_fullscreen(None);
+        window.set_decorations(!mode.borderless);
+        window.set_inner_size(dpi::LogicalSize {
+            width: f64::from(mode.width),
+            height: f64::from(mode.height),
+        });
+        window.set_resizable(mode.resizable);
 
-        let monitor = window.get_current_monitor();
-        match mode.fullscreen_type {
-            FullscreenType::Windowed => {
-                window.set_fullscreen(None);
-                window.set_decorations(!mode.borderless);
-                window.set_inner_size(dpi::LogicalSize {
-                    width: f64::from(mode.width),
-                    height: f64::from(mode.height),
-                });
-                window.set_resizable(mode.resizable);
-            }
-            FullscreenType::True => {
-                window.set_fullscreen(Some(monitor));
-                window.set_inner_size(dpi::LogicalSize {
-                    width: f64::from(mode.width),
-                    height: f64::from(mode.height),
-                });
-            }
-            FullscreenType::Desktop => {
-                let position = monitor.get_position();
-                let dimensions = monitor.get_dimensions();
-                let hidpi_factor = window.get_hidpi_factor();
-                window.set_fullscreen(None);
-                window.set_decorations(false);
-                window.set_inner_size(dimensions.to_logical(hidpi_factor));
-                window.set_position(position.to_logical(hidpi_factor));
-            }
-        }
         Ok(())
     }
 

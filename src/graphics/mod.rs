@@ -198,19 +198,13 @@ pub struct GlBackendSpec {
 }
 
 impl From<conf::Backend> for GlBackendSpec {
-    fn from(c: conf::Backend) -> Self {
+    fn from(_c: conf::Backend) -> Self {
         println!("    graphics/mod.rs - Here we can see some glutin dependency!");
-        match c {
-            conf::Backend::OpenGL { major, minor } => Self {
-                major,
-                minor,
-                api: glutin::Api::OpenGl,
-            },
-            conf::Backend::OpenGLES { major, minor } => Self {
-                major,
-                minor,
-                api: glutin::Api::OpenGlEs,
-            },
+
+        Self {
+            major: 3,
+            minor: 2,
+            api: glutin::Api::OpenGl,
         }
     }
 }
@@ -235,10 +229,6 @@ impl BackendSpec for GlBackendSpec {
             glutin::Api::OpenGl => (
                 include_bytes!("shader/basic_150.glslv"),
                 include_bytes!("shader/basic_150.glslf"),
-            ),
-            glutin::Api::OpenGlEs => (
-                include_bytes!("shader/basic_es300.glslv"),
-                include_bytes!("shader/basic_es300.glslf"),
             ),
             a => panic!("Unsupported API: {:?}, should never happen", a),
         }
