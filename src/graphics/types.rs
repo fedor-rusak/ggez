@@ -2,7 +2,9 @@ pub(crate) use nalgebra as na;
 use std::f32;
 use std::u32;
 
-use crate::graphics::{FillOptions, StrokeOptions};
+use lyon::tessellation as t;
+
+pub use self::t::{FillOptions, FillRule, LineCap, LineJoin, StrokeOptions};
 
 /// A 2 dimensional point representing a location
 pub(crate) type Point2 = na::Point2<f32>;

@@ -25,7 +25,6 @@ where
     shader_globals: Globals,
     pub(crate) projection: Matrix4,
     pub(crate) modelview_stack: Vec<Matrix4>,
-    pub(crate) white_image: ImageGeneric<B>,
     pub(crate) screen_rect: Rect,
     color_format: gfx::format::Format,
     depth_format: gfx::format::Format,
@@ -211,7 +210,7 @@ impl GraphicsContextGeneric<GlBackendSpec> {
         let sampler_info =
             texture::SamplerInfo::new(texture::FilterMethod::Bilinear, texture::WrapMode::Clamp);
         let sampler = samplers.get_or_insert(sampler_info, &mut factory);
-        let white_image = ImageGeneric::make_raw(
+        let white_image: ImageGeneric<GlBackendSpec> = ImageGeneric::make_raw(
             &mut factory,
             &sampler_info,
             1,
@@ -246,7 +245,6 @@ impl GraphicsContextGeneric<GlBackendSpec> {
             shader_globals: globals,
             projection: initial_projection,
             modelview_stack: vec![initial_transform],
-            white_image,
             screen_rect: Rect::new(left, top, right - left, bottom - top),
             color_format,
             depth_format,

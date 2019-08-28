@@ -271,13 +271,6 @@ impl Backend {
         }
     }
 
-    /// Use OpenGL ES
-    pub fn gles(self) -> Self {
-        match self {
-            Backend::OpenGL { major, minor } => Backend::OpenGLES { major, minor },
-            es => es,
-        }
-    }
 }
 
 /// The possible number of samples for multisample anti-aliasing.

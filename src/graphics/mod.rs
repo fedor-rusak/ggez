@@ -38,21 +38,17 @@ use crate::context::DebugId;
 use crate::GameError;
 use crate::GameResult;
 
-pub(crate) mod canvas;
 pub(crate) mod context;
 pub(crate) mod drawparam;
 pub(crate) mod image;
-pub(crate) mod mesh;
 pub(crate) mod shader;
 pub(crate) mod types;
 
 pub use mint;
 pub(crate) use nalgebra as na;
 
-pub use crate::graphics::canvas::*;
 pub use crate::graphics::drawparam::*;
 pub use crate::graphics::image::*;
-pub use crate::graphics::mesh::*;
 pub use crate::graphics::shader::*;
 pub use crate::graphics::types::*;
 
