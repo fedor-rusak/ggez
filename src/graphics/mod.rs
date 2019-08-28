@@ -465,7 +465,7 @@ where
     D: Drawable,
     T: Into<DrawParam>,
 {
-    println!("    graphics/mod.rs - it was just some fancy call to draw from Drawable!");
+    // println!("    graphics/mod.rs - it was just some fancy call to draw from Drawable!");
     drawable.draw(ctx, params.into())
 }
 

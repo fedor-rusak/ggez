@@ -392,7 +392,7 @@ where
         let id = (*self.current_shader.borrow()).unwrap_or(self.default_shader);
         let shader_handle = &self.shaders[id];
 
-        println!("    graphics/context.rs - actual draw!");
+        // println!("    graphics/context.rs - actual draw!");
         shader_handle.draw(&mut self.encoder, slice, &self.data)?;
         Ok(())
     }
