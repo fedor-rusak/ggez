@@ -29,12 +29,7 @@ pub struct DrawParam {
     /// The orientation of the graphic in radians.
     pub rotation: f32,
     /// The x/y scale factors expressed as a `Vector2`.
-    pub scale: mint::Vector2<f32>,
-    /// An offset from the center for transform operations like scale/rotation,
-    /// with `0,0` meaning the origin and `1,1` meaning the opposite corner from the origin.
-    /// By default these operations are done from the top-left corner, so to rotate something
-    /// from the center specify `Point2::new(0.5, 0.5)` here.
-    pub offset: mint::Point2<f32>
+    pub scale: mint::Vector2<f32>
 }
 
 impl Default for DrawParam {
@@ -44,7 +39,6 @@ impl Default for DrawParam {
             dest: mint::Point2 { x: 0.0, y: 0.0 },
             rotation: 0.0,
             scale: mint::Vector2 { x: 1.0, y: 1.0 },
-            offset: mint::Point2 { x: 0.0, y: 0.0 },
         }
     }
 }
@@ -87,22 +81,13 @@ impl DrawParam {
         self
     }
 
-    /// Set the transformation offset of the drawable.
-    pub fn offset<P>(mut self, offset: P) -> Self
-    where
-        P: Into<mint::Point2<f32>>,
-    {
-        let p: mint::Point2<f32> = offset.into();
-        self.offset = p;
-        self
-    }
-
     /// A [`DrawParam`](struct.DrawParam.html) that has been crunched down to a single matrix.
     fn to_na_matrix(&self) -> Matrix4 {
         let translate = Matrix4::new_translation(&Vec3::new(self.dest.x, self.dest.y, 0.0));
-        let offset = Matrix4::new_translation(&Vec3::new(self.offset.x, self.offset.y, 0.0));
+        let offset_value = mint::Point2 { x: 0.0, y: 0.0 }; 
+        let offset = Matrix4::new_translation(&Vec3::new(offset_value.x, offset_value.y, 0.0));
         let offset_inverse =
-            Matrix4::new_translation(&Vec3::new(-self.offset.x, -self.offset.y, 0.0));
+            Matrix4::new_translation(&Vec3::new(-offset_value.x, -offset_value.y, 0.0));
         let axis_angle = Vec3::z() * self.rotation;
         let rotation = Matrix4::new_rotation(axis_angle);
         let scale = Matrix4::new_nonuniform_scaling(&Vec3::new(self.scale.x, self.scale.y, 1.0));
@@ -142,30 +127,16 @@ where
     }
 }
 
-/// Create a `DrawParam` from a location, rotation, offset
-impl<P> From<(P, f32, P)> for DrawParam
-where
-    P: Into<mint::Point2<f32>>,
-{
-    fn from((location, rotation, offset): (P, f32, P)) -> Self {
-        DrawParam::new()
-            .dest(location)
-            .rotation(rotation)
-            .offset(offset)
-    }
-}
-
-/// Create a `DrawParam` from a location, rotation, offset, scale
-impl<P, V> From<(P, f32, P, V)> for DrawParam
+/// Create a `DrawParam` from a location, rotation, scale
+impl<P, V> From<(P, f32, V)> for DrawParam
 where
     P: Into<mint::Point2<f32>>,
     V: Into<mint::Vector2<f32>>,
 {
-    fn from((location, rotation, offset, scale): (P, f32, P, V)) -> Self {
+    fn from((location, rotation, scale): (P, f32, V)) -> Self {
         DrawParam::new()
             .dest(location)
             .rotation(rotation)
-            .offset(offset)
             .scale(scale)
     }
 }
