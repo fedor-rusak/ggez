@@ -52,15 +52,6 @@ pub use crate::graphics::image::*;
 pub use crate::graphics::shader::*;
 pub use crate::graphics::types::*;
 
-// This isn't really particularly nice, but it's only used
-// in a couple places and it's not very easy to change or configure.
-// Since the next major project is "rewrite the graphics engine" I think
-// we're fine just leaving it.
-//
-// It exists basically because gfx-rs is incomplete and we can't *always*
-// specify texture formats and such entirely at runtime, which we need to
-// do to make sRGB handling work properly.
-pub(crate) type BuggoSurfaceFormat = gfx::format::Srgba8;
 type ShaderResourceType = [f32; 4];
 
 /// A trait providing methods for working with a particular backend, such as OpenGL,
@@ -93,27 +84,6 @@ pub trait BackendSpec: fmt::Debug {
         // probably won't go away on pre-ll gfx...
         let typed_view: gfx::handle::ShaderResourceView<_, ShaderResourceType> =
             gfx::memory::Typed::new(texture_view);
-        typed_view
-    }
-
-    /// Helper function that turns a raw to typed texture.
-    /// A bit hacky since we can't really specify surface formats as part
-    /// of this that well, alas.  There's some functions, like
-    /// `gfx::Encoder::update_texture()`, that don't seem to have a `_raw()`
-    /// counterpart, so we need this, so we need `BuggoSurfaceFormat` to
-    /// keep fixed at compile time what texture format we're actually using.
-    /// Oh well!
-    fn raw_to_typed_texture(
-        &self,
-        texture_view: gfx::handle::RawTexture<Self::Resources>,
-    ) -> gfx::handle::Texture<
-        <Self as BackendSpec>::Resources,
-        <BuggoSurfaceFormat as gfx::format::Formatted>::Surface,
-    > {
-        let typed_view: gfx::handle::Texture<
-            _,
-            <BuggoSurfaceFormat as gfx::format::Formatted>::Surface,
-        > = gfx::memory::Typed::new(texture_view);
         typed_view
     }
 

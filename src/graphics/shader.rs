@@ -13,13 +13,11 @@ use gfx::shade::*;
 use gfx::state::*;
 use gfx::traits::{FactoryExt, Pod};
 use gfx::*;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use std::io::prelude::*;
 use std::marker::PhantomData;
 use std::path::Path;
-use std::rc::Rc;
 
 use crate::context::DebugId;
 use crate::error::*;
@@ -415,6 +413,7 @@ where
         data: &graphics::pipe::Data<Spec::Resources>,
     ) -> GameResult {
         let pso = self.psos.mode(self.active_blend_mode)?;
+        // println!("    graphics/shader.rs - this is actual gfx encoder draw (beside buffer swaps)");
         encoder.draw(slice, pso, &ConstData(data, &self.buffer));
         Ok(())
     }
@@ -428,56 +427,6 @@ where
     fn blend_mode(&self) -> BlendMode {
         self.active_blend_mode
     }
-}
-
-/// A lock for RAII shader regions. The shader automatically gets cleared once
-/// the lock goes out of scope, restoring the previous shader (if any).
-///
-/// Essentially, binding a [`Shader`](type.Shader.html) will return one of these,
-/// and the shader will remain active as long as this object exists.  When this is
-/// dropped, the previous shader is restored.
-#[derive(Debug, Clone)]
-pub struct ShaderLock {
-    cell: Rc<RefCell<Option<ShaderId>>>,
-    previous_shader: Option<ShaderId>,
-}
-
-impl Drop for ShaderLock {
-    fn drop(&mut self) {
-        *self.cell.borrow_mut() = self.previous_shader;
-    }
-}
-
-/// Use a shader until the returned lock goes out of scope
-pub fn use_shader<C>(ctx: &mut Context, ps: &Shader<C>) -> ShaderLock
-where
-    C: Structure<ConstFormat>,
-{
-    ps.debug_id.assert(ctx);
-    let cell = Rc::clone(&ctx.gfx_context.current_shader);
-    let previous_shader = *cell.borrow();
-    set_shader(ctx, ps);
-    ShaderLock {
-        cell,
-        previous_shader,
-    }
-}
-
-/// Set the current shader for the `Context` to render with
-pub fn set_shader<C>(ctx: &mut Context, ps: &Shader<C>)
-where
-    C: Structure<ConstFormat>,
-{
-    ps.debug_id.assert(ctx);
-    *ctx.gfx_context.current_shader.borrow_mut() = Some(ps.id);
-}
-
-/// Clears the the current shader for the `Context`, restoring the default shader.
-///
-/// However, calling this and then dropping a [`ShaderLock`](struct.ShaderLock.html)
-/// will still set the shader to whatever was set when the `ShaderLock` was created.
-pub fn clear_shader(ctx: &mut Context) {
-    *ctx.gfx_context.current_shader.borrow_mut() = None;
 }
 
 #[derive(Debug)]
