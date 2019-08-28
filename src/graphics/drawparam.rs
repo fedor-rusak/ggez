@@ -34,10 +34,7 @@ pub struct DrawParam {
     /// with `0,0` meaning the origin and `1,1` meaning the opposite corner from the origin.
     /// By default these operations are done from the top-left corner, so to rotate something
     /// from the center specify `Point2::new(0.5, 0.5)` here.
-    pub offset: mint::Point2<f32>,
-    /// A color to draw the target with.
-    /// Default: white.
-    pub color: Color,
+    pub offset: mint::Point2<f32>
 }
 
 impl Default for DrawParam {
@@ -48,7 +45,6 @@ impl Default for DrawParam {
             rotation: 0.0,
             scale: mint::Vector2 { x: 1.0, y: 1.0 },
             offset: mint::Point2 { x: 0.0, y: 0.0 },
-            color: WHITE,
         }
     }
 }
@@ -72,13 +68,6 @@ impl DrawParam {
     {
         let p: mint::Point2<f32> = dest.into();
         self.dest = p;
-        self
-    }
-
-    /// Set the drawable color.  This will be blended with whatever
-    /// color the drawn object already is.
-    pub fn color(mut self, color: Color) -> Self {
-        self.color = color;
         self
     }
 
@@ -141,56 +130,43 @@ where
     }
 }
 
-/// Create a `DrawParam` from a location and color
-impl<P> From<(P, Color)> for DrawParam
+/// Create a `DrawParam` from a location, rotation
+impl<P> From<(P, f32)> for DrawParam
 where
     P: Into<mint::Point2<f32>>,
 {
-    fn from((location, color): (P, Color)) -> Self {
-        DrawParam::new().dest(location).color(color)
-    }
-}
-
-/// Create a `DrawParam` from a location, rotation and color
-impl<P> From<(P, f32, Color)> for DrawParam
-where
-    P: Into<mint::Point2<f32>>,
-{
-    fn from((location, rotation, color): (P, f32, Color)) -> Self {
+    fn from((location, rotation): (P, f32)) -> Self {
         DrawParam::new()
             .dest(location)
             .rotation(rotation)
-            .color(color)
     }
 }
 
-/// Create a `DrawParam` from a location, rotation, offset and color
-impl<P> From<(P, f32, P, Color)> for DrawParam
+/// Create a `DrawParam` from a location, rotation, offset
+impl<P> From<(P, f32, P)> for DrawParam
 where
     P: Into<mint::Point2<f32>>,
 {
-    fn from((location, rotation, offset, color): (P, f32, P, Color)) -> Self {
+    fn from((location, rotation, offset): (P, f32, P)) -> Self {
         DrawParam::new()
             .dest(location)
             .rotation(rotation)
             .offset(offset)
-            .color(color)
     }
 }
 
-/// Create a `DrawParam` from a location, rotation, offset, scale and color
-impl<P, V> From<(P, f32, P, V, Color)> for DrawParam
+/// Create a `DrawParam` from a location, rotation, offset, scale
+impl<P, V> From<(P, f32, P, V)> for DrawParam
 where
     P: Into<mint::Point2<f32>>,
     V: Into<mint::Vector2<f32>>,
 {
-    fn from((location, rotation, offset, scale, color): (P, f32, P, V, Color)) -> Self {
+    fn from((location, rotation, offset, scale): (P, f32, P, V)) -> Self {
         DrawParam::new()
             .dest(location)
             .rotation(rotation)
             .offset(offset)
             .scale(scale)
-            .color(color)
     }
 }
 
@@ -228,7 +204,7 @@ impl From<DrawParam> for DrawTransform {
         let transform = param.to_matrix();
         DrawTransform {
             src: param.src,
-            color: param.color,
+            color: WHITE,
             matrix: transform.into(),
         }
     }
