@@ -4,7 +4,6 @@ use std::rc::Rc;
 use gfx::traits::FactoryExt;
 use gfx::Factory;
 use glutin;
-use glyph_brush::{GlyphBrush, GlyphBrushBuilder};
 use winit::{self, dpi};
 
 use crate::conf::{WindowMode, WindowSetup};
@@ -52,10 +51,6 @@ where
     default_shader: ShaderId,
     pub(crate) current_shader: Rc<RefCell<Option<ShaderId>>>,
     pub(crate) shaders: Vec<Box<dyn ShaderHandle<B>>>,
-
-    pub(crate) glyph_brush: GlyphBrush<'static, DrawParam>,
-    pub(crate) glyph_cache: ImageGeneric<B>,
-    pub(crate) glyph_state: Rc<RefCell<spritebatch::SpriteBatch>>,
 }
 
 impl<B> fmt::Debug for GraphicsContextGeneric<B>
@@ -236,25 +231,6 @@ impl GraphicsContextGeneric<GlBackendSpec> {
             out: screen_render_target.clone(),
         };
 
-        // Glyph cache stuff.
-        let glyph_brush =
-            GlyphBrushBuilder::using_font_bytes(Font::default_font_bytes().to_vec()).build();
-        let (glyph_cache_width, glyph_cache_height) = glyph_brush.texture_dimensions();
-        let initial_contents =
-            vec![255; 4 * glyph_cache_width as usize * glyph_cache_height as usize];
-        let glyph_cache = ImageGeneric::make_raw(
-            &mut factory,
-            &sampler_info,
-            glyph_cache_width as u16,
-            glyph_cache_height as u16,
-            &initial_contents,
-            color_format,
-            debug_id,
-        )?;
-        let glyph_state = Rc::new(RefCell::new(spritebatch::SpriteBatch::new(
-            glyph_cache.clone(),
-        )));
-
         // Set initial uniform values
         let left = 0.0;
         let right = window_mode.width;
@@ -295,10 +271,6 @@ impl GraphicsContextGeneric<GlBackendSpec> {
             default_shader: shader.shader_id(),
             current_shader: Rc::new(RefCell::new(None)),
             shaders: vec![draw],
-
-            glyph_brush,
-            glyph_cache,
-            glyph_state,
         };
         gfx.set_window_mode(window_mode)?;
 
@@ -575,13 +547,4 @@ where
         self.depth_format
     }
 
-    /// Simple shortcut to check whether the context's color
-    /// format is SRGB or not.
-    pub(crate) fn is_srgb(&self) -> bool {
-        if let gfx::format::Format(_, gfx::format::ChannelType::Srgb) = self.color_format() {
-            true
-        } else {
-            false
-        }
-    }
 }
