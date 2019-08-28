@@ -676,15 +676,6 @@ pub fn origin(context: &mut Context) {
     gfx.set_transform(Matrix4::identity());
 }
 
-/// Calculates the new total transformation (Model-View-Projection) matrix
-/// based on the matrices at the top of the transform and view matrix stacks
-/// and sends it to the graphics card.
-pub fn apply_transformations(context: &mut Context) -> GameResult {
-    let gfx = &mut context.gfx_context;
-    gfx.calculate_transform_matrix();
-    gfx.update_globals()
-}
-
 /// Sets the blend mode of the currently active shader program
 pub fn set_blend_mode(ctx: &mut Context, mode: BlendMode) -> GameResult {
     ctx.gfx_context.set_blend_mode(mode)
