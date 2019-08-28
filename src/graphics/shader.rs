@@ -242,6 +242,7 @@ where
             samples: sample,
         };
 
+        println!("    graphics/shader.rs - one heck of sneaky shader initialization!");
         let pso = factory.create_pipeline_state(&set, Primitive::TriangleList, rasterizer, init)?;
         psos.insert_mode(*mode, pso);
     }

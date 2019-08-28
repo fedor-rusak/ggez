@@ -563,65 +563,6 @@ pub fn screenshot(ctx: &mut Context) -> GameResult<Image> {
 // GRAPHICS STATE
 // **********************************************************************
 
-/// Get the default filter mode for new images.
-pub fn default_filter(ctx: &Context) -> FilterMode {
-    let gfx = &ctx.gfx_context;
-    gfx.default_sampler_info.filter.into()
-}
-
-/// Returns a string that tells a little about the obtained rendering mode.
-/// It is supposed to be human-readable and will change; do not try to parse
-/// information out of it!
-pub fn renderer_info(ctx: &Context) -> GameResult<String> {
-    let backend_info = ctx.gfx_context.backend_spec.info(&*ctx.gfx_context.device);
-    Ok(format!(
-        "Requested {:?} {}.{} Core profile, actually got {}.",
-        ctx.gfx_context.backend_spec.api,
-        ctx.gfx_context.backend_spec.major,
-        ctx.gfx_context.backend_spec.minor,
-        backend_info
-    ))
-}
-
-/// Returns a rectangle defining the coordinate system of the screen.
-/// It will be `Rect { x: left, y: top, w: width, h: height }`
-///
-/// If the Y axis increases downwards, the `height` of the `Rect`
-/// will be negative.
-pub fn screen_coordinates(ctx: &Context) -> Rect {
-    ctx.gfx_context.screen_rect
-}
-
-/// Sets the default filter mode used to scale images.
-///
-/// This does not apply retroactively to already created images.
-pub fn set_default_filter(ctx: &mut Context, mode: FilterMode) {
-    let gfx = &mut ctx.gfx_context;
-    let new_mode = mode.into();
-    let sampler_info = texture::SamplerInfo::new(new_mode, texture::WrapMode::Clamp);
-    // We create the sampler now so we don't end up creating it at some
-    // random-ass time while we're trying to draw stuff.
-    let _sampler = gfx.samplers.get_or_insert(sampler_info, &mut *gfx.factory);
-    gfx.default_sampler_info = sampler_info;
-}
-
-/// Sets the bounds of the screen viewport.
-///
-/// The default coordinate system has (0,0) at the top-left corner
-/// with X increasing to the right and Y increasing down, with the
-/// viewport scaled such that one coordinate unit is one pixel on the
-/// screen.  This function lets you change this coordinate system to
-/// be whatever you prefer.
-///
-/// The `Rect`'s x and y will define the top-left corner of the screen,
-/// and that plus its w and h will define the bottom-right corner.
-pub fn set_screen_coordinates(context: &mut Context, rect: Rect) -> GameResult {
-    let gfx = &mut context.gfx_context;
-    gfx.set_projection_rect(rect);
-    gfx.calculate_transform_matrix();
-    gfx.update_globals()
-}
-
 /// Sets the raw projection matrix to the given homogeneous
 /// transformation matrix.
 ///
@@ -637,26 +578,6 @@ where
     gfx.set_projection(proj);
 }
 
-/// Premultiplies the given transformation matrix with the current projection matrix
-///
-/// You must call [`apply_transformations(ctx)`](fn.apply_transformations.html)
-/// after calling this to apply these changes and recalculate the
-/// underlying MVP matrix.
-pub fn mul_projection<M>(context: &mut Context, transform: M)
-where
-    M: Into<mint::ColumnMatrix4<f32>>,
-{
-    let transform = Matrix4::from(transform.into());
-    let gfx = &mut context.gfx_context;
-    let curr = gfx.projection();
-    gfx.set_projection(transform * curr);
-}
-
-/// Gets a copy of the context's raw projection matrix
-pub fn projection(context: &Context) -> mint::ColumnMatrix4<f32> {
-    let gfx = &context.gfx_context;
-    gfx.projection().into()
-}
 
 /// Pushes a homogeneous transform matrix to the top of the transform
 /// (model) matrix stack of the `Context`. If no matrix is given, then
@@ -885,33 +806,6 @@ pub fn drawable_size(context: &Context) -> (f32, f32) {
         .unwrap_or((0.0, 0.0))
 }
 
-/// Returns raw `gfx-rs` state objects, if you want to use `gfx-rs` to write
-/// your own graphics pipeline then this gets you the interfaces you need
-/// to do so.
-///
-/// Returns all the relevant objects at once;
-/// getting them one by one is awkward 'cause it tends to create double-borrows
-/// on the Context object.
-pub fn gfx_objects(
-    context: &mut Context,
-) -> (
-    &mut <GlBackendSpec as BackendSpec>::Factory,
-    &mut <GlBackendSpec as BackendSpec>::Device,
-    &mut gfx::Encoder<
-        <GlBackendSpec as BackendSpec>::Resources,
-        <GlBackendSpec as BackendSpec>::CommandBuffer,
-    >,
-    gfx::handle::RawDepthStencilView<<GlBackendSpec as BackendSpec>::Resources>,
-    gfx::handle::RawRenderTargetView<<GlBackendSpec as BackendSpec>::Resources>,
-) {
-    let gfx = &mut context.gfx_context;
-    let f = &mut gfx.factory;
-    let d = gfx.device.as_mut();
-    let e = &mut gfx.encoder;
-    let dv = gfx.depth_view.clone();
-    let cv = gfx.data.out.clone();
-    (f, d, e, dv, cv)
-}
 
 /// All types that can be drawn on the screen implement the `Drawable` trait.
 pub trait Drawable {
@@ -932,117 +826,4 @@ pub trait Drawable {
 
     /// Gets the blend mode to be used when drawing this drawable.
     fn blend_mode(&self) -> Option<BlendMode>;
-}
-
-/// Applies `DrawParam` to `Rect`.
-pub fn transform_rect(rect: Rect, param: DrawParam) -> Rect {
-    let w = param.src.w * param.scale.x * rect.w;
-    let h = param.src.h * param.scale.y * rect.h;
-    let offset_x = w * param.offset.x;
-    let offset_y = h * param.offset.y;
-    let dest_x = param.dest.x - offset_x;
-    let dest_y = param.dest.y - offset_y;
-    let mut r = Rect {
-        w,
-        h,
-        x: dest_x + rect.x * param.scale.x,
-        y: dest_y + rect.y * param.scale.y,
-    };
-    r.rotate(param.rotation);
-    r
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::graphics::{transform_rect, DrawParam, Rect};
-    use approx::assert_relative_eq;
-    use std::f32::consts::PI;
-
-    #[test]
-    fn headless_test_transform_rect() {
-        {
-            let r = Rect {
-                x: 0.0,
-                y: 0.0,
-                w: 1.0,
-                h: 1.0,
-            };
-            let param = DrawParam::new();
-            let real = transform_rect(r, param);
-            let expected = r;
-            assert_relative_eq!(real, expected);
-        }
-        {
-            let r = Rect {
-                x: -1.0,
-                y: -1.0,
-                w: 2.0,
-                h: 1.0,
-            };
-            let param = DrawParam::new().scale([0.5, 0.5]);
-            let real = transform_rect(r, param);
-            let expected = Rect {
-                x: -0.5,
-                y: -0.5,
-                w: 1.0,
-                h: 0.5,
-            };
-            assert_relative_eq!(real, expected);
-        }
-        {
-            let r = Rect {
-                x: -1.0,
-                y: -1.0,
-                w: 1.0,
-                h: 1.0,
-            };
-            let param = DrawParam::new().offset([0.5, 0.5]);
-            let real = transform_rect(r, param);
-            let expected = Rect {
-                x: -1.5,
-                y: -1.5,
-                w: 1.0,
-                h: 1.0,
-            };
-            assert_relative_eq!(real, expected);
-        }
-        {
-            let r = Rect {
-                x: 1.0,
-                y: 0.0,
-                w: 2.0,
-                h: 1.0,
-            };
-            let param = DrawParam::new().rotation(PI * 0.5);
-            let real = transform_rect(r, param);
-            let expected = Rect {
-                x: -1.0,
-                y: 1.0,
-                w: 1.0,
-                h: 2.0,
-            };
-            assert_relative_eq!(real, expected);
-        }
-        {
-            let r = Rect {
-                x: -1.0,
-                y: -1.0,
-                w: 2.0,
-                h: 1.0,
-            };
-            let param = DrawParam::new()
-                .scale([0.5, 0.5])
-                .offset([0.0, 1.0])
-                .rotation(PI * 0.5);
-            let real = transform_rect(r, param);
-            let expected = Rect {
-                x: 0.5,
-                y: -0.5,
-                w: 0.5,
-                h: 1.0,
-            };
-            assert_relative_eq!(real, expected);
-        }
-    }
-
 }

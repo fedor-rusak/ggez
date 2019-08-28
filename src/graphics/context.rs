@@ -474,11 +474,6 @@ where
         self.projection = mat;
     }
 
-    /// Gets a copy of the raw projection matrix.
-    pub(crate) fn projection(&self) -> Matrix4 {
-        self.projection
-    }
-
     /// Sets window mode from a WindowMode object.
     pub(crate) fn set_window_mode(&mut self, mode: WindowMode) -> GameResult {
         let window = &self.window;
